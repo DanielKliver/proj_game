@@ -4,25 +4,37 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-    public float speed;
+    public float speed;           // Скорость передвижения персонажа
+    public float jumpForce;       // Сила прыжка
 
     private Rigidbody2D rb;
-    private Vector2 moveVelocity;
-    // Start is called before the first frame update
+    [SerializeField]private bool isGrounded;      // Переменная для определения, находится ли персонаж на земле
+
     void Start()
     {
-        rb = GetComponent<Rigidbody2D>();   
+        rb = GetComponent<Rigidbody2D>();
     }
 
-    // Update is called once per frame
     void Update()
     {
-        Vector2 moveInput = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
-        moveVelocity = moveInput * speed;
+        float moveInput = Input.GetAxis("Horizontal");
+        rb.velocity = new Vector2(moveInput * speed, rb.velocity.y);
+
+        if (Input.GetKeyDown(KeyCode.Space) && isGrounded)   // Проверяем, нажата ли клавиша прыжка и находится ли персонаж на земле
+        {
+            rb.AddForce(new Vector2(0f, jumpForce), ForceMode2D.Impulse);  // Применяем силу прыжка к Rigidbody
+            isGrounded = false;   // Указываем, что персонаж больше не на земле
+        }
     }
 
-    void FixedUpdate()
-    {
-        rb.MovePosition(rb.position + moveVelocity * Time.fixedDeltaTime);
-    }
+void OnCollisionEnter2D(Collision2D collision)
+{
+     if(collision.gameObject.CompareTag("Ground"))   // Проверяем столкновение с объектом "земля"
+     {
+         isGrounded = true;   // Указываем, что персонаж стоит на земле
+     }
 }
+
+}
+
+
